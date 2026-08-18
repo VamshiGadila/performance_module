@@ -1,0 +1,94 @@
+package com.practice.springbootdemo.performance_module.exception;
+import com.practice.springbootdemo.performance_module.exception.EmployeeNotFoundException;
+import com.practice.springbootdemo.performance_module.exception.ErrorResponse;
+import com.practice.springbootdemo.performance_module.exception.GoalNotFoundException;
+import com.practice.springbootdemo.performance_module.exception.PerformanceCycleNotFoundException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
+
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(EmployeeNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleEmployeeNotFound(EmployeeNotFoundException ex) {
+        ErrorResponse error = ErrorResponse.builder()
+                .status(HttpStatus.NOT_FOUND.value())
+                .message(ex.getMessage())
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(GoalNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleGoalNotFound(GoalNotFoundException ex) {
+        ErrorResponse error = ErrorResponse.builder()
+                .status(HttpStatus.NOT_FOUND.value())
+                .message(ex.getMessage())
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(PerformanceCycleNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handlePerformanceCycleNotFound(PerformanceCycleNotFoundException ex) {
+        ErrorResponse error = ErrorResponse.builder()
+                .status(HttpStatus.NOT_FOUND.value())
+                .message(ex.getMessage())
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex) {
+
+        Map<String, String> fieldErrors = new HashMap<>();
+
+        ex.getBindingResult().getFieldErrors().forEach(fe ->
+                fieldErrors.put(fe.getField(), fe.getDefaultMessage())
+        );
+
+        ErrorResponse error = ErrorResponse.builder()
+                .status(HttpStatus.BAD_REQUEST.value())
+                .message("Validation failed")
+                .timestamp(LocalDateTime.now())
+                .fieldErrors(fieldErrors)
+                .build();
+
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex) {
+
+        ErrorResponse error = ErrorResponse.builder()
+                .status(HttpStatus.BAD_REQUEST.value())
+                .message(ex.getMessage())
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleGeneric(Exception ex) {
+
+        ErrorResponse error = ErrorResponse.builder()
+                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .message("An unexpected error occurred: " + ex.getMessage())
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+}
